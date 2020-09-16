@@ -12,6 +12,8 @@ use SMSGatewayMe\Client\Api\MessageApi;
 use SMSGatewayMe\Client\Model\SendMessageRequest;
 use Carbon\Carbon;
 use App\DateTime;
+use App\Charts\energyConsumptionChart;
+
 class DashboardController extends Controller
 {
     /**
@@ -21,7 +23,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        
+
 
         // $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1pbiIsImlhdCI6MTU4MDU1OTc5OCwiZXhwIjo0MTAyNDQ0ODAwLCJ1aWQiOjc3MTA4LCJyb2xlcyI6WyJST0xFX1VTRVIiXX0.0itAev15AZH70jnynEZbqL5K0Z_YQe-Kvp1m5MZ_Ij0";
 
@@ -30,7 +32,7 @@ class DashboardController extends Controller
         // $array_fields['message'] = 'Testing data';
         // $array_fields['device_id'] = 115241;
 
-        
+
 
         // $curl = curl_init();
 
@@ -55,7 +57,7 @@ class DashboardController extends Controller
 
         // curl_close($curl);
 
-        
+
 
         // if ($err) {
         //     dd($err);
@@ -90,35 +92,35 @@ class DashboardController extends Controller
 
         // curl_close($curl);
 
-        
+
 
         // if ($err) {
         //     dd($err);
-        // } else {    
+        // } else {
         //     $messagesRaw = json_decode($response);
         //     $filteredMessages = [];
         //     // dd(date('Y-m-d H:i:s'));
         //     foreach ($messagesRaw->results as $key => $message) {
         //         if($message->status == 'received' && $message->device_id == '115242'){
         //             $filteredMessages[] = $message;
-              
+
         //             $date = $message->created_at;
         //             $convertedDate = date("Y-m-d H:i:s", strtotime($date)); //change format
         //             $adjustedTime = date('Y-m-d H:i:s', strtotime('-5 minutes',strtotime("now"))); //subtract 5mins
-                    
+
         //             // interval or date_diff()
-        //             $diff = abs(strtotime($convertedDate) - strtotime($adjustedTime)); 
-        //             $years   = floor($diff / (365*60*60*24)); 
-        //             $months  = floor(($diff - $years * 365*60*60*24) / (30*60*60*24)); 
+        //             $diff = abs(strtotime($convertedDate) - strtotime($adjustedTime));
+        //             $years   = floor($diff / (365*60*60*24));
+        //             $months  = floor(($diff - $years * 365*60*60*24) / (30*60*60*24));
         //             $days    = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
-        //             $hours   = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24)/ (60*60)); 
+        //             $hours   = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24)/ (60*60));
         //             $minuts  = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24 - $hours*60*60)/ 60);
-                    
+
         //             // $interval =  date(date_diff($convertedDate, $adjustedTime));
-                    
+
         //             echo $convertedDate . " " . $adjustedTime;
         //             echo "<br>";
-                    
+
         //             // adjustedTime = date_add(currentTime,' -5 mins'); // Y-m-d H:i:s
         //             // $date = sadasd
         //             // $time = wqqwdqw
@@ -132,16 +134,16 @@ class DashboardController extends Controller
         // }
         //     dd($filteredMessages);
         // }
-        
+
         //-End Read SMS
 
 
-        
 
 
 
-        
-    
+
+
+
 
 
 
@@ -171,10 +173,43 @@ class DashboardController extends Controller
             ->limit(3)
             ->get();
 
-           return view('pages.dashboard', ['accounts' => $accounts, 'accounts1' => $accounts1, 'notifications' => $notifications]);
+           $ECCchart = new energyConsumptionChart;
+
+           $ECCchart->labels( [ 'Sept' , 'Oct' , 'Nov' , 'Dec' ]) ;
+           $ECCchart->dataset( 'Kilowatt Hour' , 'line' , [100,200,150,250] )
+                    ->backgroundcolor("rgb(255, 99, 132)")
+                    ->fill(false)
+                    ->linetension(0)
+                    ->options([]);
+
+            $subscriberStatus = new energyConsumptionChart;
+            $subscriberStatus->labels( [ 'With Power' , 'Without Power' ]) ;
+            $subscriberStatus->dataset( 'Status' , 'pie' , [62,38] )
+                             ->backgroundColor([
+                                 "rgb(255, 150, 65)",
+                                 "rgb(255, 99, 55)"
+                            ]);
+            $consumption = new energyConsumptionChart;
+            $consumption->labels( [ 'Residential' , 'Commercial' ]) ;
+            $consumption->dataset( 'Percentage' , 'bar' , [62,38] )
+                                ->backgroundColor([
+                                    "rgb(150, 150, 65)",
+                                    "rgb(130, 99, 55)"
+                            ]);
+            $powerCuts = new energyConsumptionChart;
+            $powerCuts->labels( [ 'Sept' , 'Oct' , 'Nov' , 'Dec' ]) ;
+            $powerCuts->dataset( 'Cuts' , 'line' , [10,14,6,8] )
+                        ->backgroundcolor("rgb(10, 60, 110)")
+                        ->fill(true)
+                        ->linetension(0);
+
+           return 'here';
+           return view('pages.dashboard', ['accounts' => $accounts, 'accounts1' => $accounts1, 'notifications' => $notifications,
+                        'LineChart' => $ECCchart ,  'PieChart' => $subscriberStatus , 'BarChart' => $consumption,
+                        'powerCuts' => $powerCuts]);
     }
 
-    
+
 
 
 
