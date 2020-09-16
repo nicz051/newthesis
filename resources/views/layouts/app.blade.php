@@ -27,14 +27,10 @@
 </head>
 <body style="background-color: #696969;">
     <header style="background-image: linear-gradient(to right, #F0FFF0, #F5FFFA);">
-        <div class="justify-center">
-
-		<img src="images/download2.png" style="width: 100px; height: 100px; padding-top: 10px;">
-        <strong> CENTRAL NEGROS ELECTRIC COOPERATIVE, INC.</strong>
+		<img src="images/download2.png" style="width: 100px; height: 100px; padding-top: 10px;"><strong> CENTRAL NEGROS ELECTRIC COOPERATIVE, INC.</strong>
 		<p class="server" style="padding-bottom: 20px; margin-top: -15px;"> Server </p>
-        </div>
 	</header>
-
+    
         <main class="py-4">
             @yield('content')
         </main>
