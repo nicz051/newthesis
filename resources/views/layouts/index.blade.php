@@ -6,19 +6,15 @@
         <link rel="stylesheet" type="text/css" href="/css/style.css?d=<?php echo time(); ?>" />
         <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
-        <!-- Custom Theme Style -->
-        <link href="/build/css/custom.min.css" rel="stylesheet">
-
         <meta charset="utf-8">
-
-
+      
+        
     </head>
 
 
 
     <body onload=display_ct(); style="background-color: #696969;">
-
+    
     <div class="nav-bar" style="background-image: linear-gradient(to right, #F0FFF0, #F5FFFA);">
 
         <nav class="navbar navbar-expand-lg navbar-light" >
@@ -85,7 +81,7 @@
             </script>
 
         </div>
-
+                
        @yield('content')
 
        <script src="/js/style.js" type="text/javascript"></script>
@@ -99,7 +95,7 @@
 
     getXmlHttpRequestObject = function() {
         if (!xhr) {
-            // Create a new XMLHttpRequest object
+            // Create a new XMLHttpRequest object 
             xhr = new XMLHttpRequest();
         }
         return xhr;
@@ -107,8 +103,8 @@
 
     updateLiveData = function() {
         var now = new Date();
-        // Date string is appended as a query with live data
-        // for not to use the cached version
+        // Date string is appended as a query with live data 
+        // for not to use the cached version 
         var url = 'livefeed.txt?' + now.getTime();
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
@@ -133,26 +129,19 @@
 });
 </script> -->
 
-<!-- <script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/vue"></script>
         <script>
             var app = new Vue({
                 el: '#app',
-            }); -->
+            });
         </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
-
-
-        <!-- Custom Theme Scripts -->
-        <script src="/build/js/custom.min.js"></script>
-
-
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/6.0.6/highcharts.js" charset="utf-8"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/6.0.6/highcharts.js" charset="utf-8"></script>
         <script src=https://cdnjs.cloudflare.com/ajax/libs/echarts/4.0.2/echarts-en.min.js charset=utf-8></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js" charset="utf-8"></script> -->
-
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js" charset="utf-8"></script>
+       
+        
 
     </body>
 
-
+    
 </html>
