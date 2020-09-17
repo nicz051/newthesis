@@ -157,26 +157,44 @@ class DashboardController extends Controller
             })
             ->get();
 
-           $accounts1 = DB::table('accounts')
-           ->whereExists(function ($query) {
-               $query->select(DB::raw(1))
-                     ->from('bills')
-                     ->whereRaw('bills.bills_account_number = accounts.account_number')
-                     ->whereRaw('bills.disconnection_date <= CURDATE()')
-                     ->whereRaw('bills.status = 0');
-           })
-           ->get();
-
-           $notifications = DB::table('notifications')
-            ->whereDate('created', today())
-            ->latest('created')
-            ->limit(3)
+            $accounts1 = DB::table('accounts')
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                        ->from('bills')
+                        ->whereRaw('bills.bills_account_number = accounts.account_number')
+                        ->whereRaw('bills.disconnection_date <= CURDATE()')
+                        ->whereRaw('bills.status = 0');
+            })
             ->get();
 
-           $ECCchart = new energyConsumptionChart;
+            $notifications = DB::table('notifications')
+                ->whereDate('created', today())
+                ->latest('created')
+                ->limit(3)
+                ->get();
 
-           $ECCchart->labels( [ 'Sept' , 'Oct' , 'Nov' , 'Dec' ]) ;
-           $ECCchart->dataset( 'Kilowatt Hour' , 'line' , [100,200,150,250] )
+            $bM = DB::table('bills')
+                ->select(DB::raw('bill_month,sum(energy*1)total_energy'))
+                ->groupBy('bill_month')
+                ->get();
+
+            $status = DB::table('accounts')
+                ->select(DB::raw('(select count(status) from accounts where status = 1)withpower,
+                (select count(status) from accounts where status = 0)withoutpower'))
+                ->get();
+
+            $powerConsumption = DB::table('bills as b')
+                ->select(DB::raw('a.category,sum(b.energy*1)total_energy'))
+                ->join('accounts as a','a.account_number','b.bills_account_number')
+                ->groupBy('a.category')
+                ->get();
+            $total = $powerConsumption[0]->total_energy + $powerConsumption[1]->total_energy;
+            $resi = $powerConsumption[0]->total_energy/$total*100;
+            $commer= $powerConsumption[1]->total_energy/$total*100;
+
+            $ECCchart = new energyConsumptionChart;
+            $ECCchart->labels( [$bM[0]->bill_month ,  $bM[1]->bill_month ,  $bM[2]->bill_month ,  $bM[3]->bill_month ]) ;
+            $ECCchart->dataset( 'Kilowatt Hour' , 'line' , [$bM[0]->total_energy,$bM[1]->total_energy,$bM[2]->total_energy,$bM[3]->total_energy] )
                     ->backgroundcolor("rgb(255, 99, 132)")
                     ->fill(false)
                     ->linetension(0)
@@ -184,14 +202,14 @@ class DashboardController extends Controller
 
             $subscriberStatus = new energyConsumptionChart;
             $subscriberStatus->labels( [ 'With Power' , 'Without Power' ]) ;
-            $subscriberStatus->dataset( 'Status' , 'pie' , [62,38] )
+            $subscriberStatus->dataset( 'Status' , 'pie' , [$status[0]->withpower,$status[0]->withoutpower] )
                              ->backgroundColor([
                                  "rgb(255, 150, 65)",
                                  "rgb(255, 99, 55)"
                             ]);
             $consumption = new energyConsumptionChart;
             $consumption->labels( [ 'Residential' , 'Commercial' ]) ;
-            $consumption->dataset( 'Percentage' , 'bar' , [62,38] )
+            $consumption->dataset( 'Percentage' , 'bar' , [$resi,$commer] )
                                 ->backgroundColor([
                                     "rgb(150, 150, 65)",
                                     "rgb(130, 99, 55)"
@@ -203,7 +221,7 @@ class DashboardController extends Controller
                         ->fill(true)
                         ->linetension(0);
 
-           return 'here';
+
            return view('pages.dashboard', ['accounts' => $accounts, 'accounts1' => $accounts1, 'notifications' => $notifications,
                         'LineChart' => $ECCchart ,  'PieChart' => $subscriberStatus , 'BarChart' => $consumption,
                         'powerCuts' => $powerCuts]);
