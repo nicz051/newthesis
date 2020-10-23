@@ -2,26 +2,23 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <title>Central Negros Electric Cooperative, Inc. Server</title>
+        <link href="../build/css/custom.min.css" rel="stylesheet">
         <!-- <link rel="stylesheet" type="text/css" href="/css/style.css"> -->
         <link rel="stylesheet" type="text/css" href="/css/style.css?d=<?php echo time(); ?>" />
         <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
-        <!-- Custom Theme Style -->
-        <link href="/build/css/custom.min.css" rel="stylesheet">
-
         <meta charset="utf-8">
-
-
+      
+        
     </head>
 
 
 
     <body onload=display_ct(); style="background-color: #696969;">
+    
+    <div class="nav-bar" style="background-image: linear-gradient(to right, #F0FFF0, #006400);">
 
-    <div class="nav-bar" style="background-image: linear-gradient(to right, #F0FFF0, #F5FFFA);">
-
-        <nav class="navbar navbar-expand-lg navbar-light" >
+        <nav class="navbar navbar-expand-lg navbar-light">
         <a class="navbar-brand" href="#"><img src="/images/download2.png" style="width: 75px; height: 75px;"></a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,9 +33,9 @@
             <li class="nav-item">
                     <a class="nav-link" href="/user_profile">User Profile</a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="/notifications">Notifications</a>
-            </li>
+            </li> -->
             <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Data Tables
@@ -85,7 +82,7 @@
             </script>
 
         </div>
-
+                
        @yield('content')
 
        <script src="/js/style.js" type="text/javascript"></script>
@@ -99,7 +96,7 @@
 
     getXmlHttpRequestObject = function() {
         if (!xhr) {
-            // Create a new XMLHttpRequest object
+            // Create a new XMLHttpRequest object 
             xhr = new XMLHttpRequest();
         }
         return xhr;
@@ -107,8 +104,8 @@
 
     updateLiveData = function() {
         var now = new Date();
-        // Date string is appended as a query with live data
-        // for not to use the cached version
+        // Date string is appended as a query with live data 
+        // for not to use the cached version 
         var url = 'livefeed.txt?' + now.getTime();
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
@@ -133,26 +130,19 @@
 });
 </script> -->
 
-<!-- <script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/vue"></script>
         <script>
             var app = new Vue({
                 el: '#app',
-            }); -->
+            });
         </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
-
-
-        <!-- Custom Theme Scripts -->
-        <script src="/build/js/custom.min.js"></script>
-
-
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/6.0.6/highcharts.js" charset="utf-8"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/6.0.6/highcharts.js" charset="utf-8"></script>
         <script src=https://cdnjs.cloudflare.com/ajax/libs/echarts/4.0.2/echarts-en.min.js charset=utf-8></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js" charset="utf-8"></script> -->
-
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js" charset="utf-8"></script>
+       
+        
 
     </body>
 
-
+    
 </html>

@@ -3,7 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use DB;
+use Illuminate\Support\Facades\DB;
+use App\itexmoo;
+use App\functions;
+use SMSGatewayMe\Client\ApiClient;
+use SMSGatewayMe\Client\Configuration;
+use SMSGatewayMe\Client\Api\MessageApi;
+use SMSGatewayMe\Client\Model\SendMessageRequest;
+use Carbon\Carbon;
+use App\DateTime;
+use App\Charts\UserChart;
 
 
 class NotificationController extends Controller
@@ -16,10 +25,10 @@ class NotificationController extends Controller
     public function index()
     {
         {
-            $notifications = DB::table('notifications')
-            ->whereDate('created', today())
-            ->latest('created')
-            ->get();
+            // $notifications = DB::table('notifications')
+            // ->whereDate('created', today())
+            // ->latest('created')
+            // ->get();
 
             // foreach($notifications as $notification){
 
@@ -46,8 +55,17 @@ class NotificationController extends Controller
         //             //     $messagee= 'Reconnection Successful';
         //             // }
         //     // }
+
+
+        // function(){
+        //     $q = Request::get ( 'q' );
+        //     $user = accounts::where('account_number','LIKE','%'.$q.'%')->orWhere('email','LIKE','%'.$q.'%')->get();
+        //     if(count($user) > 0)
+        //         return view('pages.notification')->withDetails($user)->withQuery ( $q );
+        //     else return view ('pages.notification')->withMessage('No Details found. Try to search again !');
+        // };
             
-        return view('pages.notification',['notifications' => $notifications]);
+        return view('pages.searchresults');
         
     }
 }

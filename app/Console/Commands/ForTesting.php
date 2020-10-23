@@ -47,20 +47,48 @@ class ForTesting extends Command
      */
     public function handle()
     {
-        $itexmoo=new itexmoo();
-        $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1pbiIsImlhdCI6MTU4MzY2NDY3NSwiZXhwIjo0MTAyNDQ0ODAwLCJ1aWQiOjc3ODg5LCJyb2xlcyI6WyJST0xFX1VTRVIiXX0.h_B-LUEd5-XwsMThdLwTKNDyRSb7-fqqKEwbwi21f1w";
-        $datetime = new DateTime();
-        $deviceid = 115988;
-        $function = new functions();
-        $currentTime = date("Y-m-d H:i:s", strtotime("now")); //current time
-        $messageTime = date("Y-m-d H:i:s", strtotime("2020-02-20 09:09:07"));
+        // $itexmoo=new itexmoo();
+        // $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1pbiIsImlhdCI6MTU4MzY2NDY3NSwiZXhwIjo0MTAyNDQ0ODAwLCJ1aWQiOjc3ODg5LCJyb2xlcyI6WyJST0xFX1VTRVIiXX0.h_B-LUEd5-XwsMThdLwTKNDyRSb7-fqqKEwbwi21f1w";
+        // $datetime = new DateTime();
+        // $deviceid = 115988;
+        // $function = new functions();
+        // $currentTime = date("Y-m-d H:i:s", strtotime("now")); //current time
+        // $messageTime = date("Y-m-d H:i:s", strtotime("2020-02-20 09:09:07"));
 
-        echo $year = date('Y', strtotime($currentTime)) . "<br>";
-        echo $month = date('m', strtotime($currentTime)) . "<br>";
-        echo $day = date('d', strtotime($currentTime)) . "<br>";
-        echo $hours = date('G', strtotime($currentTime)) . "<br>";
-        echo $minutes = date('i', strtotime($currentTime));
-      
+        // echo $year = date('Y', strtotime($currentTime)) . "<br>";
+        // echo $month = date('m', strtotime($currentTime)) . "<br>";
+        // echo $day = date('d', strtotime($currentTime)) . "<br>";
+        // echo $hours = date('G', strtotime($currentTime)) . "<br>";
+        // echo $minutes = date('i', strtotime($currentTime));
+        
+
+        exec("mode COM1 BAUD=115200 PARITY=N data=8 stop=1 xon=off");
+    
+        $fp = fopen ("COM1", "w+");
+        if ( !$fp ){
+            return "Not open";
+        }else {
+            fwrite( $fp, "AT\n\r" );
+            usleep( 500000 );
+            fwrite( $fp, "AT+CMFG=1\n\r" );
+            usleep( 500000 );
+            fwrite( $fp, "AT+CMGS=09987653629\n\r" );
+            usleep( 500000 );
+            fwrite( $fp, "hi\n\r" );
+            usleep( 500000 );
+            fwrite( $fp, chr(26) );
+            usleep( 7000000 );
+            fclose( $fp );
+            // $message=fread($fp,1);
+            // fclose($fp);
+        return 'open';
+
+
+
+
+
+
+
         // send through itexmo
         //     $status = $itexmoo->itexmo("09987653629","$1,2,3,%1,1,1,*","TR-KIMHO570240_43KNQ");
         //     if ($status == ""){
@@ -488,4 +516,5 @@ class ForTesting extends Command
 
     }
     
+}
 }

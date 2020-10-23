@@ -12,7 +12,8 @@ use SMSGatewayMe\Client\Api\MessageApi;
 use SMSGatewayMe\Client\Model\SendMessageRequest;
 use Carbon\Carbon;
 use App\DateTime;
-use App\Charts\energyConsumptionChart;
+use App\Charts\UserChart;
+
 
 class DashboardController extends Controller
 {
@@ -23,7 +24,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-
+        
 
         // $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1pbiIsImlhdCI6MTU4MDU1OTc5OCwiZXhwIjo0MTAyNDQ0ODAwLCJ1aWQiOjc3MTA4LCJyb2xlcyI6WyJST0xFX1VTRVIiXX0.0itAev15AZH70jnynEZbqL5K0Z_YQe-Kvp1m5MZ_Ij0";
 
@@ -32,7 +33,7 @@ class DashboardController extends Controller
         // $array_fields['message'] = 'Testing data';
         // $array_fields['device_id'] = 115241;
 
-
+        
 
         // $curl = curl_init();
 
@@ -57,7 +58,7 @@ class DashboardController extends Controller
 
         // curl_close($curl);
 
-
+        
 
         // if ($err) {
         //     dd($err);
@@ -92,35 +93,35 @@ class DashboardController extends Controller
 
         // curl_close($curl);
 
-
+        
 
         // if ($err) {
         //     dd($err);
-        // } else {
+        // } else {    
         //     $messagesRaw = json_decode($response);
         //     $filteredMessages = [];
         //     // dd(date('Y-m-d H:i:s'));
         //     foreach ($messagesRaw->results as $key => $message) {
         //         if($message->status == 'received' && $message->device_id == '115242'){
         //             $filteredMessages[] = $message;
-
+              
         //             $date = $message->created_at;
         //             $convertedDate = date("Y-m-d H:i:s", strtotime($date)); //change format
         //             $adjustedTime = date('Y-m-d H:i:s', strtotime('-5 minutes',strtotime("now"))); //subtract 5mins
-
+                    
         //             // interval or date_diff()
-        //             $diff = abs(strtotime($convertedDate) - strtotime($adjustedTime));
-        //             $years   = floor($diff / (365*60*60*24));
-        //             $months  = floor(($diff - $years * 365*60*60*24) / (30*60*60*24));
+        //             $diff = abs(strtotime($convertedDate) - strtotime($adjustedTime)); 
+        //             $years   = floor($diff / (365*60*60*24)); 
+        //             $months  = floor(($diff - $years * 365*60*60*24) / (30*60*60*24)); 
         //             $days    = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
-        //             $hours   = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24)/ (60*60));
+        //             $hours   = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24)/ (60*60)); 
         //             $minuts  = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24 - $days*60*60*24 - $hours*60*60)/ 60);
-
+                    
         //             // $interval =  date(date_diff($convertedDate, $adjustedTime));
-
+                    
         //             echo $convertedDate . " " . $adjustedTime;
         //             echo "<br>";
-
+                    
         //             // adjustedTime = date_add(currentTime,' -5 mins'); // Y-m-d H:i:s
         //             // $date = sadasd
         //             // $time = wqqwdqw
@@ -134,19 +135,11 @@ class DashboardController extends Controller
         // }
         //     dd($filteredMessages);
         // }
-
+        
         //-End Read SMS
 
 
-
-
-
-
-
-
-
-
-
+        
             $accounts = DB::table('accounts')
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
@@ -157,77 +150,116 @@ class DashboardController extends Controller
             })
             ->get();
 
-            $accounts1 = DB::table('accounts')
-            ->whereExists(function ($query) {
-                $query->select(DB::raw(1))
-                        ->from('bills')
-                        ->whereRaw('bills.bills_account_number = accounts.account_number')
-                        ->whereRaw('bills.disconnection_date <= CURDATE()')
-                        ->whereRaw('bills.status = 0');
-            })
+           $accounts1 = DB::table('accounts')
+           ->whereExists(function ($query) {
+               $query->select(DB::raw(1))
+                     ->from('bills')
+                     ->whereRaw('bills.bills_account_number = accounts.account_number')
+                     ->whereRaw('bills.disconnection_date <= CURDATE()')
+                     ->whereRaw('bills.status = 0');
+           })
+           ->get();
+
+           $notifications = DB::table('notifications')
+            ->whereDate('created', today())
+            ->latest('created')
+            ->limit(3)
             ->get();
 
-            $notifications = DB::table('notifications')
-                ->whereDate('created', today())
-                ->latest('created')
-                ->limit(3)
-                ->get();
-
-            $bM = DB::table('bills')
+    // 
+        $bM = DB::table('bills')
                 ->select(DB::raw('bill_month,sum(energy*1)total_energy'))
                 ->groupBy('bill_month')
                 ->get();
 
-            $status = DB::table('accounts')
-                ->select(DB::raw('(select count(status) from accounts where status = 1)withpower,
-                (select count(status) from accounts where status = 0)withoutpower'))
-                ->get();
 
-            $powerConsumption = DB::table('bills as b')
-                ->select(DB::raw('a.category,sum(b.energy*1)total_energy'))
-                ->join('accounts as a','a.account_number','b.bills_account_number')
-                ->groupBy('a.category')
-                ->get();
-            $total = $powerConsumption[0]->total_energy + $powerConsumption[1]->total_energy;
-            $resi = $powerConsumption[0]->total_energy/$total*100;
-            $commer= $powerConsumption[1]->total_energy/$total*100;
+        $ECCchart = new UserChart;
+        $ECCchart->labels( [$bM[0]->bill_month ,  $bM[1]->bill_month ,  $bM[2]->bill_month ,  $bM[3]->bill_month  ]) ;
+        $ECCchart->dataset( 'Kilowatt Hour' , 'line' , [$bM[0]->total_energy,$bM[1]->total_energy,$bM[2]->total_energy,$bM[3]->total_energy] )
+                ->backgroundcolor( "rgb(255, 150, 65)",
+                "rgb(255, 99, 55)")
+                ->fill(false)
+                ->linetension(0)
+                // ->showLine(false)
+                ->options([]);
 
-            $ECCchart = new energyConsumptionChart;
-            $ECCchart->labels( [$bM[0]->bill_month ,  $bM[1]->bill_month ,  $bM[2]->bill_month ,  $bM[3]->bill_month ]) ;
-            $ECCchart->dataset( 'Kilowatt Hour' , 'line' , [$bM[0]->total_energy,$bM[1]->total_energy,$bM[2]->total_energy,$bM[3]->total_energy] )
-                    ->backgroundcolor("rgb(255, 99, 132)")
-                    ->fill(false)
-                    ->linetension(0)
-                    ->options([]);
+        
+    
+        $status = DB::table('accounts')
+            ->select(DB::raw('(select count(status) from accounts where status = 1)withpower,
+            (select count(status) from accounts where status = 0)withoutpower'))
+            ->get();
 
-            $subscriberStatus = new energyConsumptionChart;
-            $subscriberStatus->labels( [ 'With Power' , 'Without Power' ]) ;
-            $subscriberStatus->dataset( 'Status' , 'pie' , [$status[0]->withpower,$status[0]->withoutpower] )
-                             ->backgroundColor([
-                                 "rgb(255, 150, 65)",
-                                 "rgb(255, 99, 55)"
-                            ]);
-            $consumption = new energyConsumptionChart;
-            $consumption->labels( [ 'Residential' , 'Commercial' ]) ;
-            $consumption->dataset( 'Percentage' , 'bar' , [$resi,$commer] )
-                                ->backgroundColor([
-                                    "rgb(150, 150, 65)",
-                                    "rgb(130, 99, 55)"
-                            ]);
-            $powerCuts = new energyConsumptionChart;
-            $powerCuts->labels( [ 'Sept' , 'Oct' , 'Nov' , 'Dec' ]) ;
-            $powerCuts->dataset( 'Cuts' , 'line' , [10,14,6,8] )
-                        ->backgroundcolor("rgb(10, 60, 110)")
-                        ->fill(true)
-                        ->linetension(0);
+        $powerConsumption = DB::table('bills as b')
+            ->select(DB::raw('a.category,sum(b.energy*1)total_energy'))
+            ->join('accounts as a','a.account_number','b.bills_account_number')
+            ->groupBy('a.category')
+            ->get();
+
+        
+        $subscriberStatus = new UserChart;
+        $subscriberStatus->labels( [ 'With Power' , 'Without Power' ]) ;
+        $subscriberStatus->dataset( 'Status' , 'pie' , [$status[0]->withpower,$status[0]->withoutpower] )
+                        ->backgroundColor([
+                            "rgb(255, 150, 65)",
+                            "rgb(255, 99, 55)"
+        ]);
+
+
+
+
+        $total = $powerConsumption[0]->total_energy + $powerConsumption[1]->total_energy;
+        $resi = $powerConsumption[0]->total_energy/$total*100;
+        $commer= $powerConsumption[1]->total_energy/$total*100;
+
+
+        $consumption = new UserChart;
+        $consumption->labels( [ 'Residential' , 'Commercial' ]) ;
+        $consumption->dataset( 'Percentage' , 'bar' , [$resi,$commer] )
+                            ->backgroundColor([
+                                "rgb(255, 150, 65)",
+                            "rgb(255, 99, 55)"
+        ]);
+        
+
+
+
+        // $discon = DB::table('logs')
+        // ->select(DB::raw('count(account_number)'))
+        // ->groupBy('YEAR(disconnection_date)')
+        // // ->groupBy('MONTH(disconnection_date)')
+        // ->get();
+
+        $discon = DB::table('logs') 
+        ->select(DB::raw('count(account_number) as `data`'),DB::raw('YEAR(disconnection_date) year, MONTH(disconnection_date) month'))
+           ->groupby('year','month')
+           ->get();
+
+        
+       
+       
+
+        // SELECT COUNT(account_number) FROM `logs` group BY YEAR(disconnection_date), MONTH(disconnection_date)
+        // $discon[0]->month,  $discon[1]->month, $discon[2]->month, $discon[3]->month
+        
+        $powercuts = new UserChart;
+        $powercuts->labels( [$discon[0]->month,  $discon[1]->month, $discon[2]->month]) ;
+        $powercuts->dataset( 'Users' , 'line' , [$discon[0]->data, $discon[1]->data, $discon[2]->data] )
+                ->backgroundcolor("rgb(255, 150, 65)","rgb(255, 99, 55)")
+                ->fill(false)
+                ->linetension(0)
+                // ->showLine(false)
+                ->options([]);
+
+
+
 
 
            return view('pages.dashboard', ['accounts' => $accounts, 'accounts1' => $accounts1, 'notifications' => $notifications,
-                        'LineChart' => $ECCchart ,  'PieChart' => $subscriberStatus , 'BarChart' => $consumption,
-                        'powerCuts' => $powerCuts]);
+           'ECCchart' => $ECCchart, 'substatus' => $subscriberStatus, 'consumption' => $consumption, 'powercuts' => $powercuts]);
     }
 
-
+    
 
 
 

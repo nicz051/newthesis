@@ -87,6 +87,9 @@
             <div class="row" style="margin-top: 10px">
                 <button onclick="sortTableAccountName()" style="padding: 3px">Sort by Account Name</button>
             </div>
+            <!-- <div class="row" style="margin-top: 10px">
+                <button onclick="sortTableAccountName()" style="padding: 3px">Filter Disconnected Accounts</button>
+            </div> -->
         </div>
 </div>
 
@@ -171,6 +174,7 @@
                 }
             }
         }
+
 </script>
 
                     

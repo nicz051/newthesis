@@ -68,16 +68,16 @@ class SendReconnection extends Command
         
 
             if ($year == $currentyear && $month == $currentmonth && $day == $currentday && $hours == $currenthours && $minutes == $currentminutes){
-                echo $transaction->transaction_id . "/n";
-                echo $transaction->date_time . "/n";
-                echo $currentTime . "/n";
+                echo $transaction->transaction_id . "\n";
+                echo $transaction->date_time . "\n";
+                echo $currentTime . "\n";
 
                 $bills = DB::table('bills')
                     ->where('bills.bill_id', $transaction->transactions_bill_id)
                     ->where('bills.status', 1)->get();
 
                     foreach($bills as $bill){
-                        echo $bill->bill_id . "/n";
+                        echo $bill->bill_id . "\n";
 
 
                         $disconnectedaccounts = DB::table('disconnectedaccounts')
@@ -90,7 +90,7 @@ class SendReconnection extends Command
 
 
                                         foreach($accounts as $account){
-                                            echo $account->account_name . "/n";
+                                            echo $account->account_name . "\n";
 
                                             $smsBody = "$" . $account->meter_number . "," . '%' . 1 . "," . '*';
 
@@ -101,110 +101,137 @@ class SendReconnection extends Command
                                                     $postnum = $post->mobilenum;
                                                     // echo $post->id;
                                                 }
-
-                                            //start send message
-                                            $array_fields['phone_number'] = $post->mobilenum;
-                                            $array_fields['message'] = $smsBody;
-                                            $array_fields['device_id'] = 115988;
+                                            
+                                            echo $smsBody;
+                                            echo $postnum . " " .  "\n";
                                             
 
-                                            $curl = curl_init();
+                                            //send command via gsm
 
-                                            curl_setopt_array($curl, array(
-                                                CURLOPT_URL => "https://smsgateway.me/api/v4/message/send",
-                                                CURLOPT_RETURNTRANSFER => true,
-                                                CURLOPT_ENCODING => "",
-                                                CURLOPT_MAXREDIRS => 10,
-                                                CURLOPT_TIMEOUT => 50,
-                                                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                                                CURLOPT_CUSTOMREQUEST => "POST",
-                                                CURLOPT_POSTFIELDS => "[  " . json_encode($array_fields) . "]",
-                                                CURLOPT_HTTPHEADER => array(
-                                                    "authorization: $token",
-                                                    "cache-control: no-cache"
-                                                ),
-                                            ));
-                                            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
-                                            $response = curl_exec($curl);
-                                            $err = curl_error($curl);
-
-                                            curl_close($curl);
-
-                                            
-                                            if ($err) {
-                                                dd($err);
-                                            } else {
-                                                    // dd($response);
-
-                                                    //Start Read Messages
-                                                    $searchArray = [];
-                                                    $filteredMessages = [];
-                                                    while(sizeof($filteredMessages) == 0){
-                                                        $curl = curl_init();
-                                                        $filteredMessages = [];
-                                                        curl_setopt_array($curl, array(
-                                                            CURLOPT_URL => "https://smsgateway.me/api/v4/message/search",
-                                                            CURLOPT_RETURNTRANSFER => true,
-                                                            CURLOPT_ENCODING => "",
-                                                            CURLOPT_MAXREDIRS => 10,
-                                                            CURLOPT_TIMEOUT => 50,
-                                                            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                                                            CURLOPT_CUSTOMREQUEST => "POST",
-                                                            CURLOPT_POSTFIELDS => "[  " . json_encode($searchArray) . "]",
-                                                            CURLOPT_HTTPHEADER => array(
-                                                                "authorization: $token",
-                                                                "cache-control: no-cache"
-                                                            ),
-                                                        ));
-                                                        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-                                                
-                                                        $response = curl_exec($curl);
-                                                        $err = curl_error($curl);
-                                                
-                                                        curl_close($curl);
-                                                
-                                                        if ($err) {
-                                                            dd($err);
-                                                        } else {    
-                                                            $messagesRaw = json_decode($response);
-                                                            $filteredMessages = [];   
-                                            
-                                                            foreach ($messagesRaw->results as $key => $message) {
-                                                                                
-                                                                $currentTime = date("Y-m-d H:i:s", strtotime("now")); //current time
-                                                                $adjustedTime = date('Y-m-d H:i:s', strtotime('-5 minutes',strtotime("now"))); //subtract 5mins from current time
-                                                                $messageTime = date("Y-m-d H:i:s", strtotime($message->created_at));
-                                                                    
-                                                                if($message->status == 'sent' && $message->device_id == '115988' && $message->message == $smsBody && $messageTime >= $adjustedTime && $messageTime <= $currentTime){
-                                                                    $filteredMessages[] = $message;
-
-                                                                    
-                                                                }  
-                                                            }
-                                                        }
-                                                    }
+                                            exec("mode COM1 BAUD=115200 PARITY=N data=8 stop=1 xon=off");
+    
+                                            $fp = fopen ("COM1", "w+");
+                                            if ( !$fp ){
+                                                return "Not open";
+                                            }else {
+                                                fwrite( $fp, "AT\n\r" );
+                                                usleep( 500000 );
+                                                fwrite( $fp, "AT+CMFG=1\n\r" );
+                                                usleep( 500000 );
+                                                fwrite( $fp, "AT+CMGS=$postnum \n\r" );
+                                                usleep( 500000 );
+                                                fwrite( $fp, "$smsBody\n\r" );
+                                                usleep( 500000 );
+                                                fwrite( $fp, chr(26) );
+                                                usleep( 7000000 );
+                                                fclose( $fp );
+                                                // $message=fread($fp,1);
+                                                // fclose($fp);
+                                                return 'open';
                                             }
-                                            //end send message
+
+
+                                            // //start send message
+                                            // $array_fields['phone_number'] = $post->mobilenum;
+                                            // $array_fields['message'] = $smsBody;
+                                            // $array_fields['device_id'] = 115988;
+                                            
+
+                                            // $curl = curl_init();
+
+                                            // curl_setopt_array($curl, array(
+                                            //     CURLOPT_URL => "https://smsgateway.me/api/v4/message/send",
+                                            //     CURLOPT_RETURNTRANSFER => true,
+                                            //     CURLOPT_ENCODING => "",
+                                            //     CURLOPT_MAXREDIRS => 10,
+                                            //     CURLOPT_TIMEOUT => 50,
+                                            //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                            //     CURLOPT_CUSTOMREQUEST => "POST",
+                                            //     CURLOPT_POSTFIELDS => "[  " . json_encode($array_fields) . "]",
+                                            //     CURLOPT_HTTPHEADER => array(
+                                            //         "authorization: $token",
+                                            //         "cache-control: no-cache"
+                                            //     ),
+                                            // ));
+                                            // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+                                            // $response = curl_exec($curl);
+                                            // $err = curl_error($curl);
+
+                                            // curl_close($curl);
+
+                                            
+                                            // if ($err) {
+                                            //     dd($err);
+                                            // } else {
+                                            //         // dd($response);
+
+                                            //         //Start Read Messages
+                                            //         $searchArray = [];
+                                            //         $filteredMessages = [];
+                                            //         while(sizeof($filteredMessages) == 0){
+                                            //             $curl = curl_init();
+                                            //             $filteredMessages = [];
+                                            //             curl_setopt_array($curl, array(
+                                            //                 CURLOPT_URL => "https://smsgateway.me/api/v4/message/search",
+                                            //                 CURLOPT_RETURNTRANSFER => true,
+                                            //                 CURLOPT_ENCODING => "",
+                                            //                 CURLOPT_MAXREDIRS => 10,
+                                            //                 CURLOPT_TIMEOUT => 50,
+                                            //                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                            //                 CURLOPT_CUSTOMREQUEST => "POST",
+                                            //                 CURLOPT_POSTFIELDS => "[  " . json_encode($searchArray) . "]",
+                                            //                 CURLOPT_HTTPHEADER => array(
+                                            //                     "authorization: $token",
+                                            //                     "cache-control: no-cache"
+                                            //                 ),
+                                            //             ));
+                                            //             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                                                
+                                            //             $response = curl_exec($curl);
+                                            //             $err = curl_error($curl);
+                                                
+                                            //             curl_close($curl);
+                                                
+                                            //             if ($err) {
+                                            //                 dd($err);
+                                            //             } else {    
+                                            //                 $messagesRaw = json_decode($response);
+                                            //                 $filteredMessages = [];   
+                                            
+                                            //                 foreach ($messagesRaw->results as $key => $message) {
+                                                                                
+                                            //                     $currentTime = date("Y-m-d H:i:s", strtotime("now")); //current time
+                                            //                     $adjustedTime = date('Y-m-d H:i:s', strtotime('-5 minutes',strtotime("now"))); //subtract 5mins from current time
+                                            //                     $messageTime = date("Y-m-d H:i:s", strtotime($message->created_at));
+                                                                    
+                                            //                     if($message->status == 'sent' && $message->device_id == '115988' && $message->message == $smsBody && $messageTime >= $adjustedTime && $messageTime <= $currentTime){
+                                            //                         $filteredMessages[] = $message;
+
+                                                                    
+                                            //                     }  
+                                            //                 }
+                                            //             }
+                                            //         }
+                                            // }
+                                            // //end send message
                                         
 
                                             
                                          //insert to processaccounts after sending disco command
                                         
-                                            DB::table('processaccounts2')
-                                            ->insert([
-                                                'process' => 1,
-                                                'account_number' => $account->account_number,
-                                                'meter_number' => $account->meter_number,
-                                                'account_name' => $account->account_name,
-                                                'status' => 'pending',
-                                                'created'  => $currentTime
-                                            ]);
+                                            // DB::table('processaccounts2')
+                                            // ->insert([
+                                            //     'process' => 1,
+                                            //     'account_number' => $account->account_number,
+                                            //     'meter_number' => $account->meter_number,
+                                            //     'account_name' => $account->account_name,
+                                            //     'status' => 'pending',
+                                            //     'created'  => $currentTime
+                                            // ]);
                                         
                                             
-                                            // echo $smsBody . " ";
-                                            echo $smsBody;
-                                            echo $postnum . " " .  "\n";
+                                            // // echo $smsBody . " ";
                                             
                                         
                                 
@@ -238,16 +265,18 @@ class SendReconnection extends Command
                                 //     echo $smsBody;
                                 //     echo $postnum . " " .  "\n";
                                 // }
-
+                                        
 
                                         }
                            
                             }
                     }
             }
+        
             else{
             echo "no transaction found \n";
             }
+            
         
             
         }
