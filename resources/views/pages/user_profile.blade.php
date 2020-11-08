@@ -18,7 +18,9 @@
             </div>
         </div>
     </div>
-
+    <div class="col-m-9" style="text-align: center; color: rgb(10, 22, 25)">
+        <a href="/admin/usermanagement">Manage Users</a>
+    </div>
 
 
 

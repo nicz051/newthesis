@@ -42,9 +42,10 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     <a class="dropdown-item" href="/data_table/accounts">Accounts</a>
-                    <a class="dropdown-item" href="/data_table/disconnected_accounts">Disconnected Accounts</a>
+                    <!-- <a class="dropdown-item" href="/data_table/disconnected_accounts">Disconnected Accounts</a> -->
                     <a class="dropdown-item" href="/data_table/billing">Billing</a>
                     <a class="dropdown-item" href="/data_table/collection">Collection</a>
+                    <a class="dropdown-item" href="/data_table/logs">Logs</a>
                 </div>
             </li>
             <li class="nav-item">

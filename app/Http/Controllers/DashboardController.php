@@ -140,7 +140,7 @@ class DashboardController extends Controller
 
 
         
-            $accounts = DB::table('accounts')
+            $accounts = DB::table('accounts') 
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
                         ->from('bills')
@@ -174,8 +174,8 @@ class DashboardController extends Controller
 
 
         $ECCchart = new UserChart;
-        $ECCchart->labels( [$bM[0]->bill_month ,  $bM[1]->bill_month ,  $bM[2]->bill_month ,  $bM[3]->bill_month  ]) ;
-        $ECCchart->dataset( 'Kilowatt Hour' , 'line' , [$bM[0]->total_energy,$bM[1]->total_energy,$bM[2]->total_energy,$bM[3]->total_energy] )
+        $ECCchart->labels( [$bM[0]->bill_month ,  $bM[1]->bill_month ,  $bM[2]->bill_month ,  $bM[3]->bill_month, $bM[4]->bill_month, $bM[5]->bill_month  ]) ;
+        $ECCchart->dataset( 'Kilowatt Hour' , 'line' , [$bM[0]->total_energy,$bM[1]->total_energy,$bM[2]->total_energy,$bM[3]->total_energy,$bM[4]->total_energy,$bM[5]->total_energy] )
                 ->backgroundcolor( "rgb(255, 150, 65)",
                 "rgb(255, 99, 55)")
                 ->fill(false)

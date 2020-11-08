@@ -17,13 +17,14 @@ class AdminMiddleware
     public function handle($request, Closure $next)
     {
         $module = Auth::guard()->user()->type;
-            // dd($module);
+        
+        //dd($module);
         if ( $module != explode("/", $request->route()->getPrefix())[1] ) {
-            // dd($module);
             return redirect( $module . "/dashboard" );
         }
 
         return $next($request);
+
         // if(Auth::user()->type == 'admin')
         // {
         //     return $next($request);
